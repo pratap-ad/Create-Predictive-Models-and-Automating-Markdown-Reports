@@ -2,7 +2,7 @@
 title: "Project II ST558"
 author: "Pratap Adhikari"
 date: "10/9/2020"
-output: html_document
+output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
