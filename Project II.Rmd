@@ -60,6 +60,46 @@ knnFit
 ```
 
 
+### Plot of k vs Accuracy
+
+The best number value for neighbors given by the model fit is `r knnFit$bestTune`.
+
+
+```{r}
+kacc<- tbl_df(knnFit$results[, 1:2])
+ggplot(kacc, aes(x=k, y=RMSE)) + geom_point( color="blue") +
+  geom_line(color="green") +
+  ggtitle(" k vs. Accuracy")
+```
+
+
+
+```{r}
+
+#Test the test data set by predicting it
+test_pred<- predict(knnFit, newdata = popDataTest)
+test_pred
+```
+
+
+```{r}
+#Capture the predictions
+pred<- predict(knnFit, newdata=popDataTest)
+postResample(pred, obs=popDataTest$shares)<- tbl1$table
+
+
+```
+
+
+```{r}
+#Find the prediction error rate 
+misClass<- 1-sum(diag(tbl2))/sum(tbl2)
+misClass
+
+```
+The miss classification percentage we got from out train model is `r round(misClass*100,2)` %
+
+
 
 
 
