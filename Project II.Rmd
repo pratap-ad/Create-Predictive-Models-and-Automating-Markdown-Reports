@@ -10,6 +10,66 @@ knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
 library(tidyverse)
 library(haven)
 library(knitr)
+library(class)
+library(caret)
 ```
+
+
+```{r}
+popData<- read_csv("OnlineNewsPopularity.csv")
+popData
+
+```
+
+```{r}
+#day<- function(day, ...){}
+
+```
+
+
+### Processing
+
+```{r}
+# checking if any missing values in the raw data
+anyNA(popData)
+```
+No missing values were found.
+
+
+```{r}
+# Create train and test data set.
+set.seed(2)
+train<- sample(1:nrow(popData), size = nrow(popData) *0.7)
+test<- dplyr::setdiff(1:nrow(popData), train)
+
+popDataTrain<- popData[train, -1]
+popDataTest<- popData[test,-1]
+```
+
+
+### Trai the model 
+
+```{r}
+trCtrl<- trainControl(method="repeatedcv", number=10, repeats=3)
+knnFit<- train(shares ~., data=popDataTrain, method="knn",
+               trControl=trCtrl,
+               preProcess=c("center", "scale"),
+               tunelength=10)
+
+knnFit
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
