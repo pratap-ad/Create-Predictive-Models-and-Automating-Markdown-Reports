@@ -91,14 +91,6 @@ postResample(pred, obs=popDataTest$shares)<- tbl1$table
 ```
 
 
-```{r}
-#Find the prediction error rate 
-misClass<- 1-sum(diag(tbl2))/sum(tbl2)
-misClass
-
-```
-The miss classification percentage we got from out train model is `r round(misClass*100,2)` %
-
 
 
 
