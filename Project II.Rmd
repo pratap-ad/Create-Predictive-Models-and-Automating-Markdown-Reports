@@ -74,19 +74,13 @@ ggplot(kacc, aes(x=k, y=RMSE)) + geom_point( color="blue") +
 
 
 
-```{r}
 
-#Test the test data set by predicting it
-test_pred<- predict(knnFit, newdata = popDataTest)
-test_pred
-```
 
 
 ```{r}
-#Capture the predictions
+#Prediction and post Resampling
 pred<- predict(knnFit, newdata=popDataTest)
-postResample(pred, obs=popDataTest$shares)<- tbl1$table
-
+postResample(pred, obs=popDataTest$shares)
 
 ```
 
