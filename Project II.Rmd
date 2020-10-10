@@ -60,7 +60,7 @@ knnFit
 ```
 
 
-### Plot of k vs Accuracy
+### Plot of k vs RMSE
 
 The best number value for neighbors given by the model fit is `r knnFit$bestTune`.
 
