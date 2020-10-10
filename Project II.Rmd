@@ -33,7 +33,7 @@ popData
 # checking if any missing values in the raw data
 anyNA(popData)
 ```
-No missing values were found.
+FALSE indicates there are no missing values.
 
 
 ```{r}
@@ -47,7 +47,7 @@ popDataTest<- popData[test,-1]
 ```
 
 
-### Trai the model 
+### Train the model 
 
 ```{r}
 trCtrl<- trainControl(method="repeatedcv", number=10, repeats=3)
@@ -69,7 +69,7 @@ The best number value for neighbors given by the model fit is `r knnFit$bestTune
 kacc<- tbl_df(knnFit$results[, 1:2])
 ggplot(kacc, aes(x=k, y=RMSE)) + geom_point( color="blue") +
   geom_line(color="green") +
-  ggtitle(" k vs. Accuracy")
+  ggtitle(" k vs. RMSE")
 ```
 
 
