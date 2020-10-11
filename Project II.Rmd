@@ -12,6 +12,7 @@ library(haven)
 library(knitr)
 library(class)
 library(caret)
+library(tree)
 ```
 
 
@@ -20,6 +21,7 @@ popData<- read_csv("OnlineNewsPopularity.csv")
 popData
 
 ```
+
 
 ```{r}
 #day<- function(day, ...){}
@@ -32,11 +34,14 @@ popData
 ```{r}
 # checking if any missing values in the raw data
 anyNA(popData)
+#summary(popData)
 ```
 FALSE indicates there are no missing values.
 
 
-```{r}
+
+
+```{r eval=F}
 # Create train and test data set.
 set.seed(2)
 train<- sample(1:nrow(popData), size = nrow(popData) *0.7)
@@ -47,9 +52,78 @@ popDataTest<- popData[test,-1]
 ```
 
 
-### Train the model 
+```{r}
+weekday<- c("weekday_is_monday", "weekday_is_tuesday", "weekday_is_wednesday", "weekday_is_thursday", "weekday_is_friday", "weekday_is_saturday", "weekday_is_sunday", "is_weekend" )
+
+# define week day 
+x= "weekday_is_monday"
+
+#create final train data set
+popDataFinalTrain<- popDataTrain %>% select( -weekday ) %>% mutate(week_day= x)
+popDataFinalTrain
+
+#create final test data set
+popDataFinalTest<- popDataTest %>% select( -weekday ) %>% mutate(weekday_is_monday= x)
+popDataFinalTest
+```
+
+
+
 
 ```{r}
+popTreeFit<- tree(shares~ ., data=popDataTrain)
+plot(popTreeFit); text(popTreeFit)
+
+```
+
+
+```{r}
+#CV error
+cvTree<- cv.tree(popTreeFit)
+cvTree
+
+```
+
+
+
+Plot of CV error change
+```{r}
+plot(cvTree$size, cvTree$dev, type="b")
+
+```
+
+
+Predictions
+```{r}
+predPop<- predict(popTreeFit, newdata = dplyr::select(popDataFinalTest, -shares))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#########################################################
+
+
+
+
+
+
+### Train the model 
+
+```{r eval=F}
 trCtrl<- trainControl(method="repeatedcv", number=10, repeats=3)
 knnFit<- train(shares ~., data=popDataTrain, method="knn",
                trControl=trCtrl,
@@ -59,13 +133,15 @@ knnFit<- train(shares ~., data=popDataTrain, method="knn",
 knnFit
 ```
 
-
 ### Plot of k vs RMSE
 
 The best number value for neighbors given by the model fit is `r knnFit$bestTune`.
 
 
+if the day is MOnday:
 ```{r}
+
+
 kacc<- tbl_df(knnFit$results[, 1:2])
 ggplot(kacc, aes(x=k, y=RMSE)) + geom_point( color="blue") +
   geom_line(color="green") +
