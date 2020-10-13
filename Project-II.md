@@ -171,16 +171,20 @@ boostPred<- predict(boostFit, newdata= dplyr::select(popDataFinalTest, -shares),
 compare RMSE values (root of test prediction error)
 
 ``` r
-boostRMSE<- sqrt(mean(boostPred-popDataFinalTest$shares)^2 )
+boostRMSE<- sqrt(mean(boostPred - popDataFinalTest$shares)^2 )
 
 #table the RMSE from both of the model fits
-kable (c(boost=boostRMSE, tree= treeRMSE))
+RMSE<- c(boost=boostRMSE, tree= treeRMSE)
+
+kable(as.data.frame( RMSE), caption = "RMSE table")
 ```
 
-|       |        x |
+|       |     RMSE |
 | :---- | -------: |
 | boost | 323.2867 |
 | tree  | 160.4879 |
+
+RMSE table
 
 # 
 
@@ -206,6 +210,12 @@ rpartFit<- rpart(shares~., data=popDataFinalTrain,
 
 plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
 #summary(rpartFit)
+```
+
+``` r
+library(knitr)
+library(dplyr)
+render("Project II.Rmd", output_format= "github_document", output_file= I("README.md") )
 ```
 
 ``` r
