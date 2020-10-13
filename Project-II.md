@@ -3,25 +3,23 @@ Project II ST558
 Pratap Adhikari
 10/9/2020
 
+Read the data
+
 ``` r
 popData<- read_csv("OnlineNewsPopularity.csv")
-popData
+head(popData)
 ```
 
-    ## # A tibble: 39,644 x 61
-    ##    url   timedelta n_tokens_title n_tokens_content n_unique_tokens
-    ##    <chr>     <dbl>          <dbl>            <dbl>           <dbl>
-    ##  1 http~       731             12              219           0.664
-    ##  2 http~       731              9              255           0.605
-    ##  3 http~       731              9              211           0.575
-    ##  4 http~       731              9              531           0.504
-    ##  5 http~       731             13             1072           0.416
-    ##  6 http~       731             10              370           0.560
-    ##  7 http~       731              8              960           0.418
-    ##  8 http~       731             12              989           0.434
-    ##  9 http~       731             11               97           0.670
-    ## 10 http~       731             10              231           0.636
-    ## # ... with 39,634 more rows, and 56 more variables: n_non_stop_words <dbl>,
+    ## # A tibble: 6 x 61
+    ##   url   timedelta n_tokens_title n_tokens_content n_unique_tokens
+    ##   <chr>     <dbl>          <dbl>            <dbl>           <dbl>
+    ## 1 http~       731             12              219           0.664
+    ## 2 http~       731              9              255           0.605
+    ## 3 http~       731              9              211           0.575
+    ## 4 http~       731              9              531           0.504
+    ## 5 http~       731             13             1072           0.416
+    ## 6 http~       731             10              370           0.560
+    ## # ... with 56 more variables: n_non_stop_words <dbl>,
     ## #   n_non_stop_unique_tokens <dbl>, num_hrefs <dbl>, num_self_hrefs <dbl>,
     ## #   num_imgs <dbl>, num_videos <dbl>, average_token_length <dbl>,
     ## #   num_keywords <dbl>, data_channel_is_lifestyle <dbl>,
@@ -59,7 +57,12 @@ anyNA(popData)
 
     ## [1] FALSE
 
-No missing values were found.
+``` r
+#summary(popData)
+```
+
+FALSE indicates there are no missing values. Next, to split the train
+and test set
 
 ``` r
 # Create train and test data set.
@@ -71,54 +74,145 @@ popDataTrain<- popData[train, -1]
 popDataTest<- popData[test,-1]
 ```
 
-### Trai the model
-
 ``` r
-trCtrl<- trainControl(method="repeatedcv", number=10, repeats=3)
-knnFit<- train(shares ~., data=popDataTrain, method="knn",
-               trControl=trCtrl,
-               preProcess=c("center", "scale"),
-               tunelength=10)
+#difine all of  the days variables on data set
+weekday<- c("weekday_is_monday", "weekday_is_tuesday", "weekday_is_wednesday", "weekday_is_thursday", "weekday_is_friday", "weekday_is_saturday", "weekday_is_sunday", "is_weekend" )
+#create final train data set
+popDataFinalTrain<- popDataTrain  %>% mutate(weekday= popDataTrain$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
 
-knnFit
+#create final test data set
+popDataFinalTest<- popDataTest  %>% mutate(weekday= popDataTest$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
 ```
 
-    ## k-Nearest Neighbors 
-    ## 
-    ## 27750 samples
-    ##    59 predictor
-    ## 
-    ## Pre-processing: centered (59), scaled (59) 
-    ## Resampling: Cross-Validated (10 fold, repeated 3 times) 
-    ## Summary of sample sizes: 24975, 24975, 24975, 24975, 24974, 24975, ... 
-    ## Resampling results across tuning parameters:
-    ## 
-    ##   k  RMSE      Rsquared     MAE     
-    ##   5  11237.32  0.004132921  3274.174
-    ##   7  10941.08  0.005447601  3185.991
-    ##   9  10814.72  0.006284535  3148.626
-    ## 
-    ## RMSE was used to select the optimal model using the smallest value.
-    ## The final value used for the model was k = 9.
-
-### Plot of k vs RMSE
-
-The best number value for neighbors given by the model fit is 9.
+# Tree Based model
 
 ``` r
-kacc<- tbl_df(knnFit$results[, 1:2])
-ggplot(kacc, aes(x=k, y=RMSE)) + geom_point( color="blue") +
-  geom_line(color="green") +
-  ggtitle(" k vs. Accuracy")
+popTreeFit<- tree(shares~ ., data=popDataFinalTrain,
+                  control= tree.control(nrow(popDataFinalTrain), mincut = 10, minsize = 20, mindev = 0.01))
+
+plot(popTreeFit); text(popTreeFit)
 ```
 
 ![](Project-II_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
-#Prediction and post Resampling
-pred<- predict(knnFit, newdata=popDataTest)
-postResample(pred, obs=popDataTest$shares)
+summary(popTreeFit)
 ```
 
-    ##         RMSE     Rsquared          MAE 
-    ## 1.303683e+04 4.556890e-03 3.017838e+03
+    ## 
+    ## Regression tree:
+    ## tree(formula = shares ~ ., data = popDataFinalTrain, control = tree.control(nrow(popDataFinalTrain), 
+    ##     mincut = 10, minsize = 20, mindev = 0.01))
+    ## Variables actually used in tree construction:
+    ## [1] "kw_avg_avg"                "self_reference_min_shares"
+    ## Number of terminal nodes:  3 
+    ## Residual mean deviance:  1.19e+08 = 3.303e+12 / 27750 
+    ## Distribution of residuals:
+    ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    ## -67800.0  -2103.0  -1627.0      0.0   -426.8 683800.0
+
+``` r
+#Using selected predictors only
+#popDataFinalTrain$weekday<- as.factor(popDataFinalTrain$weekday)
+popTreeFit1<- tree(shares~ kw_avg_avg + self_reference_min_shares + weekday ,
+                  data=popDataFinalTrain)
+plot(popTreeFit1); text(popTreeFit)
+summary(popTreeFit1)
+```
+
+``` r
+#CV error
+cvTree<- cv.tree(popTreeFit)
+cvTree
+```
+
+    ## $size
+    ## [1] 3 2 1
+    ## 
+    ## $dev
+    ## [1] 3.390069e+12 3.398327e+12 3.398327e+12
+    ## 
+    ## $k
+    ## [1]        -Inf 42031209238 48385621441
+    ## 
+    ## $method
+    ## [1] "deviance"
+    ## 
+    ## attr(,"class")
+    ## [1] "prune"         "tree.sequence"
+
+Plot of CV error change
+
+``` r
+plot(cvTree$size, cvTree$dev, type="b")
+```
+
+![](Project-II_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+### Prediction
+
+``` r
+predpop<- predict(popTreeFit, newdata= dplyr::select(popDataFinalTest, -shares) )
+
+#RMSE
+treeRMSE<- sqrt(mean(predpop - popDataFinalTest$shares)^2)
+```
+
+# 
+
+# Boosted Tree method:
+
+``` r
+boostFit<- gbm(shares~ ., data=popDataFinalTrain, distribution = "gaussian", n.trees = 5000, shrinkage = 0.1, interaction.depth = 4)
+
+boostPred<- predict(boostFit, newdata= dplyr::select(popDataFinalTest, -shares), n.trees=5000)
+```
+
+compare RMSE values (root of test prediction error)
+
+``` r
+boostRMSE<- sqrt(mean(boostPred-popDataFinalTest$shares)^2 )
+
+#table the RMSE from both of the model fits
+kable (c(boost=boostRMSE, tree= treeRMSE))
+```
+
+|       |        x |
+| :---- | -------: |
+| boost | 323.2867 |
+| tree  | 160.4879 |
+
+# 
+
+# Using rpart function
+
+``` r
+rpartFit<- rpart(shares~., data=popDataFinalTrain, 
+      control= rpart.control( cp=0.01, minsplit = 6, 
+              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
+              surrogatestyle = 0, maxdepth = 30 ) )
+
+
+plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
+#summary(rpartFit)
+```
+
+``` r
+rpartFit<- rpart(shares~., data=popDataFinalTrain, 
+      control= rpart.control( cp=0.01, minsplit = 6, minbucket = round(minsplit/3),
+              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
+              surrogatestyle = 0, maxdepth = 30 ) )
+
+
+plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
+#summary(rpartFit)
+```
+
+``` r
+rpart(shares~., data=popDataFinalTrain, 
+      control= rpart.control(minsplit = 3, minbucket = round(minsplit/3), cp=0.01, 
+              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
+              surrogatestyle = 0, maxdepth = 30 ) )
+```
+
+#

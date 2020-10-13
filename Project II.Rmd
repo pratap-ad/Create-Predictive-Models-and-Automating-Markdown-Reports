@@ -6,19 +6,20 @@ output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+knitr::opts_chunk$set( message = F, warning = F, cache = T)
 library(tidyverse)
 library(haven)
 library(knitr)
 library(class)
 library(caret)
 library(tree)
+library(gbm)
 ```
 
-
+Read the data
 ```{r}
 popData<- read_csv("OnlineNewsPopularity.csv")
-popData
+head(popData)
 
 ```
 
@@ -36,12 +37,12 @@ popData
 anyNA(popData)
 #summary(popData)
 ```
-FALSE indicates there are no missing values.
+FALSE indicates there are no missing values. Next, to split the train and test set
 
 
 
 
-```{r eval=F}
+```{r}  
 # Create train and test data set.
 set.seed(2)
 train<- sample(1:nrow(popData), size = nrow(popData) *0.7)
@@ -53,27 +54,36 @@ popDataTest<- popData[test,-1]
 
 
 ```{r}
+#difine all of  the days variables on data set
 weekday<- c("weekday_is_monday", "weekday_is_tuesday", "weekday_is_wednesday", "weekday_is_thursday", "weekday_is_friday", "weekday_is_saturday", "weekday_is_sunday", "is_weekend" )
-
-# define week day 
-x= "weekday_is_monday"
-
 #create final train data set
-popDataFinalTrain<- popDataTrain %>% select( -weekday ) %>% mutate(week_day= x)
-popDataFinalTrain
+popDataFinalTrain<- popDataTrain  %>% mutate(weekday= popDataTrain$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
 
 #create final test data set
-popDataFinalTest<- popDataTest %>% select( -weekday ) %>% mutate(weekday_is_monday= x)
-popDataFinalTest
+popDataFinalTest<- popDataTest  %>% mutate(weekday= popDataTest$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
+
+```
+
+
+# Tree Based model
+```{r}
+popTreeFit<- tree(shares~ ., data=popDataFinalTrain,
+                  control= tree.control(nrow(popDataFinalTrain), mincut = 10, minsize = 20, mindev = 0.01))
+
+plot(popTreeFit); text(popTreeFit)
+summary(popTreeFit)
 ```
 
 
 
 
-```{r}
-popTreeFit<- tree(shares~ ., data=popDataTrain)
-plot(popTreeFit); text(popTreeFit)
-
+```{r eval=F}
+#Using selected predictors only
+#popDataFinalTrain$weekday<- as.factor(popDataFinalTrain$weekday)
+popTreeFit1<- tree(shares~ kw_avg_avg + self_reference_min_shares + weekday ,
+                  data=popDataFinalTrain)
+plot(popTreeFit1); text(popTreeFit)
+summary(popTreeFit1)
 ```
 
 
@@ -85,18 +95,19 @@ cvTree
 ```
 
 
-
 Plot of CV error change
 ```{r}
 plot(cvTree$size, cvTree$dev, type="b")
 
 ```
 
+### Prediction
 
-Predictions
 ```{r}
-predPop<- predict(popTreeFit, newdata = dplyr::select(popDataFinalTest, -shares))
+predpop<- predict(popTreeFit, newdata= dplyr::select(popDataFinalTest, -shares) )
 
+#RMSE
+treeRMSE<- sqrt(mean(predpop - popDataFinalTest$shares)^2)
 ```
 
 
@@ -105,73 +116,66 @@ predPop<- predict(popTreeFit, newdata = dplyr::select(popDataFinalTest, -shares)
 
 
 
+###########################################################
+
+# Boosted Tree method:
+
+```{r}
+boostFit<- gbm(shares~ ., data=popDataFinalTrain, distribution = "gaussian", n.trees = 5000, shrinkage = 0.1, interaction.depth = 4)
+
+boostPred<- predict(boostFit, newdata= dplyr::select(popDataFinalTest, -shares), n.trees=5000)
+
+```
+
+compare RMSE values (root of test prediction error)
+```{r}
+boostRMSE<- sqrt(mean(boostPred-popDataFinalTest$shares)^2 )
+
+#table the RMSE from both of the model fits
+kable (c(boost=boostRMSE, tree= treeRMSE))
+```
 
 
 
 
 
-
-
-
-
-#########################################################
-
-
-
-
-
-
-### Train the model 
+#############################################################
+# Using rpart function
 
 ```{r eval=F}
-trCtrl<- trainControl(method="repeatedcv", number=10, repeats=3)
-knnFit<- train(shares ~., data=popDataTrain, method="knn",
-               trControl=trCtrl,
-               preProcess=c("center", "scale"),
-               tunelength=10)
 
-knnFit
-```
-
-### Plot of k vs RMSE
-
-The best number value for neighbors given by the model fit is `r knnFit$bestTune`.
+rpartFit<- rpart(shares~., data=popDataFinalTrain, 
+      control= rpart.control( cp=0.01, minsplit = 6, 
+              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
+              surrogatestyle = 0, maxdepth = 30 ) )
 
 
-if the day is MOnday:
-```{r}
-
-
-kacc<- tbl_df(knnFit$results[, 1:2])
-ggplot(kacc, aes(x=k, y=RMSE)) + geom_point( color="blue") +
-  geom_line(color="green") +
-  ggtitle(" k vs. RMSE")
+plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
+#summary(rpartFit)
 ```
 
 
+```{r eval=F}
+
+rpartFit<- rpart(shares~., data=popDataFinalTrain, 
+      control= rpart.control( cp=0.01, minsplit = 6, minbucket = round(minsplit/3),
+              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
+              surrogatestyle = 0, maxdepth = 30 ) )
 
 
+plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
+#summary(rpartFit)
+```
 
+```{r eval=F}
 
-```{r}
-#Prediction and post Resampling
-pred<- predict(knnFit, newdata=popDataTest)
-postResample(pred, obs=popDataTest$shares)
+rpart(shares~., data=popDataFinalTrain, 
+      control= rpart.control(minsplit = 3, minbucket = round(minsplit/3), cp=0.01, 
+              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
+              surrogatestyle = 0, maxdepth = 30 ) )
 
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#################################################################
 
