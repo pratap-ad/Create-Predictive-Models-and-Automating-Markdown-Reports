@@ -77,6 +77,7 @@ popDataTest<- popData[test,-1]
 ``` r
 #difine all of  the days variables on data set
 weekday<- c("weekday_is_monday", "weekday_is_tuesday", "weekday_is_wednesday", "weekday_is_thursday", "weekday_is_friday", "weekday_is_saturday", "weekday_is_sunday", "is_weekend" )
+
 #create final train data set
 popDataFinalTrain<- popDataTrain  %>% mutate(weekday= popDataTrain$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
 
@@ -88,28 +89,64 @@ popDataFinalTest<- popDataTest  %>% mutate(weekday= popDataTest$weekday_is_monda
 
 ``` r
 popTreeFit<- tree(shares~ ., data=popDataFinalTrain,
-                  control= tree.control(nrow(popDataFinalTrain), mincut = 10, minsize = 20, mindev = 0.01))
+                  control= tree.control(nrow(popDataFinalTrain), mincut = 3, minsize = 6, mindev = 0.001))
 
-plot(popTreeFit); text(popTreeFit)
+plot(popTreeFit, type = c("proportional", "uniform")); text(popTreeFit, pretty = 1, cex=0.8)
 ```
 
 ![](Project-II_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
+#fancyRpartPlot(popTreeFit)
+
 summary(popTreeFit)
 ```
 
     ## 
     ## Regression tree:
     ## tree(formula = shares ~ ., data = popDataFinalTrain, control = tree.control(nrow(popDataFinalTrain), 
-    ##     mincut = 10, minsize = 20, mindev = 0.01))
+    ##     mincut = 3, minsize = 6, mindev = 0.001))
     ## Variables actually used in tree construction:
-    ## [1] "kw_avg_avg"                "self_reference_min_shares"
-    ## Number of terminal nodes:  3 
-    ## Residual mean deviance:  1.19e+08 = 3.303e+12 / 27750 
+    ##  [1] "kw_avg_avg"                 "self_reference_avg_sharess"
+    ##  [3] "kw_max_avg"                 "num_videos"                
+    ##  [5] "avg_positive_polarity"      "n_tokens_title"            
+    ##  [7] "kw_max_min"                 "timedelta"                 
+    ##  [9] "LDA_02"                     "kw_avg_min"                
+    ## [11] "self_reference_min_shares"  "self_reference_max_shares" 
+    ## [13] "avg_negative_polarity"      "global_rate_positive_words"
+    ## [15] "min_negative_polarity"      "LDA_01"                    
+    ## Number of terminal nodes:  28 
+    ## Residual mean deviance:  93690000 = 2.597e+12 / 27720 
     ## Distribution of residuals:
-    ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-    ## -67800.0  -2103.0  -1627.0      0.0   -426.8 683800.0
+    ##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+    ## -231200.0   -2043.0   -1199.0       0.0    -156.4  455400.0
+
+# Train function
+
+``` r
+popFit<- train(shares~ ., data=popDataFinalTrain[1:100,],
+             method="rpart",
+             preProcess= c("center", "scale"),
+             trControl= trainControl(method = "LOOCV"))
+```
+
+``` r
+plot(popFit)
+```
+
+![](Project-II_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
+plot(popFit$finalModel); text(popFit$finalModel, pretty = 1, cex=0.8)
+```
+
+![](Project-II_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+``` r
+fancyRpartPlot(popFit$finalModel)
+```
+
+![](Project-II_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ``` r
 #Using selected predictors only
@@ -127,13 +164,16 @@ cvTree
 ```
 
     ## $size
-    ## [1] 3 2 1
+    ##  [1] 28 27 26 25 24 23 21 16 15  7  4  1
     ## 
     ## $dev
-    ## [1] 3.390069e+12 3.398327e+12 3.398327e+12
+    ##  [1] 3.462375e+12 3.462375e+12 3.462375e+12 3.462375e+12 3.462375e+12
+    ##  [6] 3.462375e+12 3.462375e+12 3.462375e+12 3.462375e+12 3.462375e+12
+    ## [11] 3.489240e+12 3.393704e+12
     ## 
     ## $k
-    ## [1]        -Inf 42031209238 48385621441
+    ##  [1]        -Inf  3405993945  4594044275  5058922641  6549401250  7109179094
+    ##  [7]  9135262819 14381848791 20419519634 35196004928 53817272986 72021205344
     ## 
     ## $method
     ## [1] "deviance"
@@ -147,7 +187,7 @@ Plot of CV error change
 plot(cvTree$size, cvTree$dev, type="b")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Project-II_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ### Prediction
 
@@ -181,8 +221,8 @@ kable(as.data.frame( RMSE), caption = "RMSE table")
 
 |       |     RMSE |
 | :---- | -------: |
-| boost | 323.2867 |
-| tree  | 160.4879 |
+| boost | 341.4323 |
+| tree  | 260.3659 |
 
 RMSE table
 
@@ -202,6 +242,7 @@ plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
 ```
 
 ``` r
+minsplit=6
 rpartFit<- rpart(shares~., data=popDataFinalTrain, 
       control= rpart.control( cp=0.01, minsplit = 6, minbucket = round(minsplit/3),
               maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
@@ -215,6 +256,7 @@ plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
 ``` r
 library(knitr)
 library(dplyr)
+
 render("Project II.Rmd", output_format= "github_document", output_file= I("README.md") )
 ```
 

@@ -6,7 +6,7 @@ output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set( message = F, warning = F, cache = T)
+knitr::opts_chunk$set( message = F, warning = F, catch=T )
 library(tidyverse)
 library(haven)
 library(knitr)
@@ -14,6 +14,8 @@ library(class)
 library(caret)
 library(tree)
 library(gbm)
+library(rattle)
+library(rpart)
 ```
 
 Read the data
@@ -41,7 +43,6 @@ FALSE indicates there are no missing values. Next, to split the train and test s
 
 
 
-
 ```{r}  
 # Create train and test data set.
 set.seed(2)
@@ -56,11 +57,13 @@ popDataTest<- popData[test,-1]
 ```{r}
 #difine all of  the days variables on data set
 weekday<- c("weekday_is_monday", "weekday_is_tuesday", "weekday_is_wednesday", "weekday_is_thursday", "weekday_is_friday", "weekday_is_saturday", "weekday_is_sunday", "is_weekend" )
+
 #create final train data set
-popDataFinalTrain<- popDataTrain  %>% mutate(weekday= popDataTrain$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
+popDataFinalTrain1<- popDataTrain  %>% mutate(weekday= popDataTrain$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
+popDataFinalTrain<- popDataTrain  %>% filter(weekday_is_monday==1)
 
 #create final test data set
-popDataFinalTest<- popDataTest  %>% mutate(weekday= popDataTest$weekday_is_monday) %>% select( -all_of(weekday), -is_weekend )
+popDataFinalTest<- popDataTest  %>% filter(weekday_is_monday==1) 
 
 ```
 
@@ -68,19 +71,37 @@ popDataFinalTest<- popDataTest  %>% mutate(weekday= popDataTest$weekday_is_monda
 # Tree Based model
 ```{r}
 popTreeFit<- tree(shares~ ., data=popDataFinalTrain,
-                  control= tree.control(nrow(popDataFinalTrain), mincut = 10, minsize = 20, mindev = 0.01))
+                  control= tree.control(nrow(popDataFinalTrain), mincut = 3, minsize = 6, mindev = 0.001))
 
-plot(popTreeFit); text(popTreeFit)
+plot(popTreeFit, type = c("proportional", "uniform")); text(popTreeFit, pretty = 1, cex=0.8)
+
+#fancyRpartPlot(popTreeFit)
+
 summary(popTreeFit)
 ```
 
+
+# Train function
+```{r}
+popFit<- train(shares~ ., data=popDataFinalTrain[1:100,],
+             method="rpart",
+             preProcess= c("center", "scale"),
+             trControl= trainControl(method = "LOOCV")
+```
+
+```{r}
+plot(popFit)
+
+#plot(popFit$finalModel); text(popFit$finalModel, pretty = 1, cex=0.8)
+fancyRpartPlot(popFit$finalModel)
+```
 
 
 
 ```{r eval=F}
 #Using selected predictors only
 #popDataFinalTrain$weekday<- as.factor(popDataFinalTrain$weekday)
-popTreeFit1<- tree(shares~ kw_avg_avg + self_reference_min_shares + weekday ,
+popTreeFit1<- tree(shares~ kw_avg_avg + self_reference_min_shares + weekday_is_monday ,
                   data=popDataFinalTrain)
 plot(popTreeFit1); text(popTreeFit)
 summary(popTreeFit1)
@@ -121,9 +142,9 @@ treeRMSE<- sqrt(mean(predpop - popDataFinalTest$shares)^2)
 # Boosted Tree method:
 
 ```{r}
-boostFit<- gbm(shares~ ., data=popDataFinalTrain, distribution = "gaussian", n.trees = 5000, shrinkage = 0.1, interaction.depth = 4)
+boostFit<- gbm(shares~ ., data=popDataFinalTrain[1:50,], distribution = "gaussian", n.trees = 10, shrinkage = 0.1, interaction.depth = 4)
 
-boostPred<- predict(boostFit, newdata= dplyr::select(popDataFinalTest, -shares), n.trees=5000)
+boostPred<- predict(boostFit, newdata= dplyr::select(popDataFinalTest, -shares), n.trees=10)
 
 ```
 
@@ -142,51 +163,12 @@ kable(as.data.frame( RMSE), caption = "RMSE table")
 
 
 #############################################################
-# Using rpart function
-
-```{r eval=F}
-
-rpartFit<- rpart(shares~., data=popDataFinalTrain, 
-      control= rpart.control( cp=0.01, minsplit = 6, 
-              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
-              surrogatestyle = 0, maxdepth = 30 ) )
-
-
-plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
-#summary(rpartFit)
-```
-
-
-```{r eval=F}
-
-rpartFit<- rpart(shares~., data=popDataFinalTrain, 
-      control= rpart.control( cp=0.01, minsplit = 6, minbucket = round(minsplit/3),
-              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
-              surrogatestyle = 0, maxdepth = 30 ) )
-
-
-plot(rpartFit); text(rpartFit, pretty = 1, cex=0.8)
-#summary(rpartFit)
-```
 
 
 ```{r, eval=F, error=F}
 library(knitr)
 library(dplyr)
-render("Project II.Rmd", output_format= "github_document", output_file= I("README.md") )
+
+render("Project II.Rmd", output_format= "github_document", output_file= I("README.md") ) 
 
 ```
-
-
-```{r eval=F}
-
-rpart(shares~., data=popDataFinalTrain, 
-      control= rpart.control(minsplit = 3, minbucket = round(minsplit/3), cp=0.01, 
-              maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10,
-              surrogatestyle = 0, maxdepth = 30 ) )
-
-```
-
-
-#################################################################
-
