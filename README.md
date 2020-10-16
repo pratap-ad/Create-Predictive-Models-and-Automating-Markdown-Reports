@@ -4,8 +4,8 @@ Pratap Adhikari
 10/9/2020
 
 `{r setup, include=FALSE} knitr::opts_chunk$set( message = F, warning =
-F, catch=T ) library(tidyverse) library(haven) library(knitr)
-library(class) library(caret) library(tree) library(gbm) library(rattle)
+F) library(tidyverse) library(haven) library(knitr) library(class)
+library(caret) library(tree) library(gbm) library(rattle)
 library(rpart)`
 
 Read the data
@@ -71,7 +71,7 @@ summary(popTreeFit)
 popFit<- train(shares~ ., data=popDataFinalTrain[1:100,],
              method="rpart",
              preProcess= c("center", "scale"),
-             trControl= trainControl(method = "LOOCV")
+             trControl= trainControl(method = "LOOCV"))
 ```
 
 ``` {r}
@@ -131,6 +131,8 @@ kable(as.data.frame( RMSE), caption = "RMSE table")
 
 # 
 
-\`\`\`{r, eval=F, error=F} library(knitr) library(dplyr)
+\`\`\`{r, eval=F, error=F} \#library(knitr) \#library(dplyr)
+
+rmarkdown::render(“Project II.Rmd”, output\_file= “README.md”)
 
 \`\`\`
