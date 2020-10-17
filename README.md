@@ -17,8 +17,8 @@ well as to the users if any. And also to doucument the work securely for future 
 
 The analysis is done for each of the week day.
 1. [Monday's Analysis](mondayAnalysis.md)
-2. [Tuesday's Analysis]
-3. [Wednesday's Analysis]
+2. [Tuesday's Analysis](tuesdayAnalysis.md)
+3. [Wednesday's Analysis](wednesdayAnalysis.md)
 4. [Thursday's Analysis]
 5. [Friday's Analysis]
 6. [Saturday's Analysis]
