@@ -151,44 +151,6 @@ popDayData<- popData  %>% filter(Analysis == params$value)
 popDayData
 ```
 
-    ## # A tibble: 6,661 x 59
-    ##    timedelta n_tokens_title n_tokens_content n_unique_tokens n_non_stop_words
-    ##        <dbl>          <dbl>            <dbl>           <dbl>            <dbl>
-    ##  1       731             12              219           0.664             1.00
-    ##  2       731              9              255           0.605             1.00
-    ##  3       731              9              211           0.575             1.00
-    ##  4       731              9              531           0.504             1.00
-    ##  5       731             13             1072           0.416             1.00
-    ##  6       731             10              370           0.560             1.00
-    ##  7       731              8              960           0.418             1.00
-    ##  8       731             12              989           0.434             1.00
-    ##  9       731             11               97           0.670             1.00
-    ## 10       731             10              231           0.636             1.00
-    ## # ... with 6,651 more rows, and 54 more variables:
-    ## #   n_non_stop_unique_tokens <dbl>, num_hrefs <dbl>, num_self_hrefs <dbl>,
-    ## #   num_imgs <dbl>, num_videos <dbl>, average_token_length <dbl>,
-    ## #   num_keywords <fct>, data_channel_is_lifestyle <dbl>,
-    ## #   data_channel_is_entertainment <dbl>, data_channel_is_bus <dbl>,
-    ## #   data_channel_is_socmed <dbl>, data_channel_is_tech <dbl>,
-    ## #   data_channel_is_world <dbl>, kw_min_min <dbl>, kw_max_min <dbl>,
-    ## #   kw_avg_min <dbl>, kw_min_max <dbl>, kw_max_max <dbl>, kw_avg_max <dbl>,
-    ## #   kw_min_avg <dbl>, kw_max_avg <dbl>, kw_avg_avg <dbl>,
-    ## #   self_reference_min_shares <dbl>, self_reference_max_shares <dbl>,
-    ## #   self_reference_avg_sharess <dbl>, weekday_is_monday <dbl>,
-    ## #   weekday_is_tuesday <dbl>, weekday_is_wednesday <dbl>,
-    ## #   weekday_is_thursday <dbl>, weekday_is_friday <dbl>,
-    ## #   weekday_is_saturday <dbl>, weekday_is_sunday <dbl>, LDA_00 <dbl>,
-    ## #   LDA_01 <dbl>, LDA_02 <dbl>, LDA_03 <dbl>, LDA_04 <dbl>,
-    ## #   global_subjectivity <dbl>, global_sentiment_polarity <dbl>,
-    ## #   global_rate_positive_words <dbl>, global_rate_negative_words <dbl>,
-    ## #   rate_positive_words <dbl>, rate_negative_words <dbl>,
-    ## #   avg_positive_polarity <dbl>, min_positive_polarity <dbl>,
-    ## #   max_positive_polarity <dbl>, avg_negative_polarity <dbl>,
-    ## #   min_negative_polarity <dbl>, max_negative_polarity <dbl>,
-    ## #   title_subjectivity <dbl>, title_sentiment_polarity <dbl>,
-    ## #   abs_title_subjectivity <dbl>, abs_title_sentiment_polarity <dbl>,
-    ## #   shares <dbl>
-
 ``` r
 # Create train and test data set.
 set.seed(2001)
@@ -242,7 +204,7 @@ kable(table(sumryData$num_keywords))
 ggplot(sumryData, aes(x=num_imgs, y=shares, by=num_keywords)) + geom_point(aes(color=num_keywords)) + ggtitle("Number of images vs shares") + labs(x=" Number of images")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 # +  geom_smooth(method='lm', color='green')
@@ -251,7 +213,7 @@ ggplot(sumryData, aes(x=num_imgs, y=shares, by=num_keywords)) + geom_point(aes(c
 ggplot(sumryData, aes(x=num_videos, y=shares, by=num_keywords)) + geom_point(aes(color=num_keywords))  + labs(x="Number of Videos", y="Shares", title= "Number of videos vs shares" )+  scale_fill_discrete(name="Number of keywords")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ### Bar plot
 
@@ -259,13 +221,13 @@ ggplot(sumryData, aes(x=num_videos, y=shares, by=num_keywords)) + geom_point(aes
 ggplot(sumryData, aes(x=num_imgs)) + geom_bar(aes(fill=num_keywords), position = "dodge") + xlab("Number of images") + scale_fill_discrete(name="Number of keywords")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 ggplot(sumryData, aes(x=num_videos)) + geom_bar(aes(fill=num_keywords), position = "dodge") + xlab("Number of videos") + scale_fill_discrete(name="Number of keywords")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 ### Box plot
 
@@ -273,7 +235,7 @@ ggplot(sumryData, aes(x=num_videos)) + geom_bar(aes(fill=num_keywords), position
 ggplot(sumryData, aes(x=num_keywords, y=n_tokens_content)) + geom_boxplot() + geom_jitter(aes(color=num_keywords)) + ggtitle("Boxplot for Number of words in content") + xlab("Number of Keywords") + ylab("Number of words in the content")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ### Histogram
 
@@ -281,13 +243,13 @@ ggplot(sumryData, aes(x=num_keywords, y=n_tokens_content)) + geom_boxplot() + ge
 ggplot(sumryData, aes(shares, ..density.., fill=num_keywords)) + geom_histogram(bins = 100) + geom_density(col="red", lwd=1, adjust=50, alpha=0.5) + ggtitle("Histogram for Shares")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 ggplot(sumryData, aes(shares, ..density..)) + geom_histogram(bins = 100) + geom_density(col="red", lwd=0.5, adjust=50) +facet_wrap(~num_keywords, ) + ggtitle("Histogram for Shares by number of words")
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 ## Use of `Train` function and method=`rpart`
 
@@ -302,14 +264,14 @@ popFit<- train(shares~ ., data=popDataFinalTrain[600:700, ],
 plot(popFit)
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 #plot(popFit$finalModel); text(popFit$finalModel, pretty = 1, cex=0.8)
 fancyRpartPlot(popFit$finalModel)
 ```
 
-![](Project-II_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](mondayAnalysis_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
 
 ### Prediction
 

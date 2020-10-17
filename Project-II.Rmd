@@ -181,7 +181,7 @@ sumryData<- popDataFinalTrain %>% select(num_imgs, num_videos, n_tokens_content,
 summary(sumryData$shares)
 
 #Number of key words
-table(sumryData$num_keywords)
+kable(table(sumryData$num_keywords))
 
 ```
 
