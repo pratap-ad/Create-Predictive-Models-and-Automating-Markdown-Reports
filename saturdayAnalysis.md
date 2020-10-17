@@ -115,7 +115,7 @@ anyNA(popData)
 FALSE indicates there are no missing values. Next, to split the train
 and test set
 
-# For the weekday: monday
+# For the weekday: saturday
 
 ``` r
 #data table
@@ -173,8 +173,8 @@ sumryData<- popDataFinalTrain %>% select(num_imgs, num_videos, n_tokens_content,
 summary(sumryData$shares)
 ```
 
-    ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-    ##      1.0    912.2   1400.0   3774.7   2700.0 690400.0
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##      43    1300    2000    4222    3600  617900
 
 ``` r
 #Number of key words
@@ -184,16 +184,16 @@ summary(sumryData$shares)
 
 | Var1 | Freq |
 | :--- | ---: |
-| 1    |    1 |
-| 2    |    5 |
-| 3    |   63 |
-| 4    |  278 |
-| 5    |  634 |
-| 6    |  880 |
-| 7    |  871 |
-| 8    |  702 |
-| 9    |  539 |
-| 10   |  689 |
+| 1    |    2 |
+| 2    |    2 |
+| 3    |   22 |
+| 4    |   89 |
+| 5    |  187 |
+| 6    |  232 |
+| 7    |  300 |
+| 8    |  245 |
+| 9    |  237 |
+| 10   |  401 |
 
 ## Plots
 
@@ -205,7 +205,7 @@ summary(sumryData$shares)
 ggplot(sumryData, aes(x=num_imgs, y=shares, by=num_keywords)) + geom_point(aes(color=num_keywords)) + ggtitle("Number of images vs shares") + labs(x=" Number of images")
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 # +  geom_smooth(method='lm', color='green')
@@ -214,7 +214,7 @@ ggplot(sumryData, aes(x=num_imgs, y=shares, by=num_keywords)) + geom_point(aes(c
 ggplot(sumryData, aes(x=num_videos, y=shares, by=num_keywords)) + geom_point(aes(color=num_keywords))  + labs(x="Number of Videos", y="Shares", title= "Number of videos vs shares" )+  scale_fill_discrete(name="Number of keywords")
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ### Bar plot
 
@@ -222,13 +222,13 @@ ggplot(sumryData, aes(x=num_videos, y=shares, by=num_keywords)) + geom_point(aes
 ggplot(sumryData, aes(x=num_imgs)) + geom_bar(aes(fill=num_keywords), position = "dodge") + xlab("Number of images") + scale_fill_discrete(name="Number of keywords")
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ggplot(sumryData, aes(x=num_videos)) + geom_bar(aes(fill=num_keywords), position = "dodge") + xlab("Number of videos") + scale_fill_discrete(name="Number of keywords")
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ### Box plot
 
@@ -236,7 +236,7 @@ ggplot(sumryData, aes(x=num_videos)) + geom_bar(aes(fill=num_keywords), position
 ggplot(sumryData, aes(x=num_keywords, y=n_tokens_content)) + geom_boxplot() + geom_jitter(aes(color=num_keywords)) + ggtitle("Boxplot for Number of words in content") + xlab("Number of Keywords") + ylab("Number of words in the content")
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ### Histogram
 
@@ -244,13 +244,13 @@ ggplot(sumryData, aes(x=num_keywords, y=n_tokens_content)) + geom_boxplot() + ge
 ggplot(sumryData, aes(shares, ..density.., fill=num_keywords)) + geom_histogram(bins = 100) + geom_density(col="red", lwd=1, adjust=50, alpha=0.5) + ggtitle("Histogram for Shares")
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 ggplot(sumryData, aes(shares, ..density..)) + geom_histogram(bins = 100) + geom_density(col="red", lwd=0.5, adjust=50) +facet_wrap(~num_keywords, ) + ggtitle("Histogram for Shares by number of words")
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
 
 ## Use of `Train` function and method=`rpart`
 
@@ -265,14 +265,14 @@ popFit<- train(shares~ ., data=popDataFinalTrain[600:700, ],
 plot(popFit)
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 #plot(popFit$finalModel); text(popFit$finalModel, pretty = 1, cex=0.8)
 fancyRpartPlot(popFit$finalModel)
 ```
 
-![](mondayAnalysis_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+![](saturdayAnalysis_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 ### Prediction
 
@@ -312,10 +312,10 @@ RMSE<- c(boost=boostRMSE, tree_based= treeRMSE)
 kable(as.data.frame( RMSE), caption = "RMSE table")
 ```
 
-|             |       RMSE |
-| :---------- | ---------: |
-| boost       | 3205.93728 |
-| tree\_based |   98.34542 |
+|             |     RMSE |
+| :---------- | -------: |
+| boost       | 694.3195 |
+| tree\_based | 691.3332 |
 
 RMSE table
 

@@ -119,7 +119,7 @@ FALSE indicates there are no missing values. Next, to split the train and test s
 
 
 
-# For the weekday `r params$weekday` 
+# For the weekday: `r params$weekday` 
 
 ```{r}
 #data table
@@ -181,7 +181,8 @@ sumryData<- popDataFinalTrain %>% select(num_imgs, num_videos, n_tokens_content,
 summary(sumryData$shares)
 
 #Number of key words
-kable(table(sumryData$num_keywords))
+
+  kable(table(sumryData$num_keywords))
 
 ```
 
