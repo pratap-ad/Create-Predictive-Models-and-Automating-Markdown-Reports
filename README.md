@@ -16,13 +16,13 @@ well as to the users if any. And also to doucument the work securely for future 
 
 
 The analysis is done for each of the week day.
-1. [Monday's Analysis](mondayAnalysis.md)
-2. [Tuesday's Analysis](tuesdayAnalysis.md)
-3. [Wednesday's Analysis](wednesdayAnalysis.md)
-4. [Thursday's Analysis](thursdayAnalysis.md)
-5. [Friday's Analysis](fridaydayAnalysis.md)
-6. [Saturday's Analysis](saturdaydayAnalysis.md)
-7. [Sunday's Analysis](sundaydayAnalysis.md)
+1. Analysis for [Monday is available here](mondayAnalysis.md)
+2. Analysis for [Tuesday is available here](tuesdayAnalysis.md)
+3. Analysis for [Wednesday is available here](wednesdayAnalysis.md)
+4. Analysis for [Thursday is available here](thursdayAnalysis.md)
+5. Analysis for [Friday is available here](fridayAnalysis.md)
+6. Analysis for [Saturday is available here](saturdayAnalysis.md)
+7. Analysis for [Sunday is available here](sundayAnalysis.md)
 
 
 ## Code used for Automation
