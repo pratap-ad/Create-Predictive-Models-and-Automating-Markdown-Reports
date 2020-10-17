@@ -14,14 +14,12 @@ params:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set( message = F, warning = F)
 library(tidyverse)
-library(haven)
 library(knitr)
 library(caret)
 library(gbm)
 library(rattle)
 library(rpart)
 library(rmarkdown)
-library(DT)
 library(ggplot2)
 ```
 
@@ -127,7 +125,7 @@ FALSE indicates there are no missing values. Next, to split the train and test s
 #data table
 
 popData$num_keywords<- as.factor(popData$num_keywords)
-DT::datatable(popData  %>% filter(weekday_is_monday == params$value))
+
 popData<- popData %>% select(-is_weekend, -1)
 
 #define weekdays
@@ -154,7 +152,7 @@ if(params$weekday== weekDays[1]) {
 
 finalData<- popData %>% mutate(Analysis) 
 popDayData<- popData  %>% filter(Analysis == params$value) 
-
+popDayData
 ```
 
 
@@ -163,7 +161,7 @@ popDayData<- popData  %>% filter(Analysis == params$value)
 
 ```{r}  
 # Create train and test data set.
-#set.seed(2000)
+set.seed(2001)
 train<- sample(1:nrow(popDayData), size = nrow(popDayData) *0.7)
 test<- dplyr::setdiff(1:nrow(popDayData), train)
 
@@ -183,7 +181,7 @@ sumryData<- popDataFinalTrain %>% select(num_imgs, num_videos, n_tokens_content,
 summary(sumryData$shares)
 
 #Number of key words
-kable(table(sumryData$num_keywords))
+table(sumryData$num_keywords)
 
 ```
 
