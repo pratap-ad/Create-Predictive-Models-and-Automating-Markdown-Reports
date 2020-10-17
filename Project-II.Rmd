@@ -4,18 +4,12 @@ author: "Pratap Adhikari"
 date: "10/9/2020"
 output: rmarkdown::github_document
 params:
-  weekday: weekday_is_monday
+  weekday: "monday"
   value: 1
 ---
-# Introduction
-The project I am going to do is about the analysis of the Online News Popularity.  .The articles were said to be published by [Mashable](www.mashable.com) . The data set were downloaded from this [link](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) . The response variable is `shares` I will be analyzing the popularity by fitting the two different tree based models: 
-    + a (non ensemble) tree based model chosen using leave one out cross validation     + (LOOCV) and a boosted tree model chosen using cross-validation.
 
 
 
-## Required packages and their calls
-
-The list of packages are: tidyverse, knitr, caret, gbm, rattle gbm, rmarkdown.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set( message = F, warning = F)
@@ -28,8 +22,18 @@ library(rattle)
 library(rpart)
 library(rmarkdown)
 library(DT)
+library(ggplot2)
 ```
 
+# Introduction
+The project I am going to do is about the analysis of the Online News Popularity.  .The articles were said to be published by [Mashable](www.mashable.com) . The data set were downloaded from this [link](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) . The response variable is `shares` I will be analyzing the popularity by fitting the two different tree based models: 
+    + a (non ensemble) tree based model chosen using leave one out cross validation     + (LOOCV) and a boosted tree model chosen using cross-validation.
+
+
+
+## Required packages 
+
+The list of packages are: tidyverse, knitr, caret, gbm, rattle gbm, rmarkdown, ggplot2.
 
 ## Attribute Information:
 
@@ -98,7 +102,7 @@ Number of Attributes: 61 (58 predictive attributes, 2 non-predictive, 1 goal fie
 59. abs_title_sentiment_polarity: Absolute polarity level
 60. shares: Number of shares (target)
 
-# Data set
+# Read in Data set
 ```{r}
 #Read the data
 popData<- read_csv("OnlineNewsPopularity.csv")
@@ -111,20 +115,52 @@ popData<- read_csv("OnlineNewsPopularity.csv")
 ```{r}
 # checking if any missing values in the raw data
 anyNA(popData)
-#summary(popData)
+
 ```
 FALSE indicates there are no missing values. Next, to split the train and test set
 
 
 
-
+# For the weekday `r params$weekday` 
 
 ```{r}
-#filter the data
-popDayData<- popData  %>% filter(weekday_is_monday == params$value) %>% select(-is_weekend, -1)
 #data table
+
+popData$num_keywords<- as.factor(popData$num_keywords)
 DT::datatable(popData  %>% filter(weekday_is_monday == params$value))
+popData<- popData %>% select(-is_weekend, -1)
+
+#define weekdays
+weekDays<- c("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+if(params$weekday== weekDays[1]) { 
+  Analysis=  popData$weekday_is_monday
+  } else if (params$weekday== weekDays[2]){
+    Analysis= popData$weekday_is_tuesday
+  } else if (params$weekday== weekDays[3]){
+    Analysis= popData$weekday_is_wednesday
+  } else if (params$weekday== weekDays[4]){
+    Analysis= popData$weekday_is_thursday
+  } else if (params$weekday== weekDays[5]){
+    Analysis= popData$weekday_is_friday
+  } else if (params$weekday== weekDays[6]){
+    Analysis= popData$weekday_is_saturday
+  } else if (params$weekday== weekDays[7]){
+    Analysis= popData$weekday_is_sunday
+  } else {
+    Analysis="error"
+  }
+
+finalData<- popData %>% mutate(Analysis) 
+popDayData<- popData  %>% filter(Analysis == params$value) 
+
 ```
+
+
+
+
+
 ```{r}  
 # Create train and test data set.
 #set.seed(2000)
@@ -140,15 +176,65 @@ popDataFinalTest<- popDayData[test,-1]
 ## Summary about the train data
 
 ```{r}
-sumryData<- popDataFinalTrain %>% select(num_imgs, num_videos, global_subjectivity, global_rate_positive_words, shares)
-summarise(sumryData)
+sumryData<- popDataFinalTrain %>% select(num_imgs, num_videos, n_tokens_content, global_subjectivity,  global_rate_positive_words, paste0("weekday_is_", params$weekday) , num_keywords, shares)
+
+
+# summary statistics of `shares` variable
+summary(sumryData$shares)
+
+#Number of key words
+kable(table(sumryData$num_keywords))
 
 ```
 
 
+
+## Plots
+
+### scatter plots
+```{r}
+#scatter plot
+#number of images vs shares
+ggplot(sumryData, aes(x=num_imgs, y=shares, by=num_keywords)) + geom_point(aes(color=num_keywords)) + ggtitle("Number of images vs shares") + labs(x=" Number of images")
+# +  geom_smooth(method='lm', color='green')
+
+#number of videos vs shares
+ggplot(sumryData, aes(x=num_videos, y=shares, by=num_keywords)) + geom_point(aes(color=num_keywords))  + labs(x="Number of Videos", y="Shares", title= "Number of videos vs shares" )+  scale_fill_discrete(name="Number of keywords")
+
+```
+
+### Bar plot
+
+```{r}
+ggplot(sumryData, aes(x=num_imgs)) + geom_bar(aes(fill=num_keywords), position = "dodge") + xlab("Number of images") + scale_fill_discrete(name="Number of keywords")
+ggplot(sumryData, aes(x=num_videos)) + geom_bar(aes(fill=num_keywords), position = "dodge") + xlab("Number of videos") + scale_fill_discrete(name="Number of keywords")
+```
+
+### Box plot
+
+```{r}
+ggplot(sumryData, aes(x=num_keywords, y=n_tokens_content)) + geom_boxplot() + geom_jitter(aes(color=num_keywords)) + ggtitle("Boxplot for Number of words in content") + xlab("Number of Keywords") + ylab("Number of words in the content")
+
+```
+
+
+
+
+### Histogram
+
+```{r}
+
+ggplot(sumryData, aes(shares, ..density.., fill=num_keywords)) + geom_histogram(bins = 100) + geom_density(col="red", lwd=1, adjust=50, alpha=0.5) + ggtitle("Histogram for Shares")
+
+ggplot(sumryData, aes(shares, ..density..)) + geom_histogram(bins = 100) + geom_density(col="red", lwd=0.5, adjust=50) +facet_wrap(~num_keywords, ) + ggtitle("Histogram for Shares by number of words")
+
+```
+
+
+
 ## Use of `Train` function and method=`rpart`
 ```{r}
-popFit<- train(shares~ ., data=popDataFinalTrain[1:100,],
+popFit<- train(shares~ ., data=popDataFinalTrain[600:700, ],
              method="rpart",
              preProcess= c("center", "scale"),
              trControl= trainControl(method = "LOOCV"))
@@ -162,7 +248,7 @@ fancyRpartPlot(popFit$finalModel)
 ```
 
 
-## Prediction
+### Prediction
 
 ```{r}
 predpop<- predict(popFit, newdata= dplyr::select(popDataFinalTest, -shares) )
@@ -183,10 +269,15 @@ treeRMSE<- sqrt(mean(predpop - popDataFinalTest$shares)^2)
 
 ```{r}
 #fit the model
-boostFit<- gbm(shares~ ., data=popDataFinalTrain[1:50,], distribution = "gaussian", n.trees = 10, shrinkage = 0.1, interaction.depth = 4)
+boostFit<- gbm(shares~ ., data=popDataFinalTrain[1:50,], 
+              distribution = "gaussian", 
+              n.trees = 10, 
+              shrinkage = 0.1, 
+              interaction.depth = 4)
 
 #prediction
-boostPred<- predict(boostFit, newdata= dplyr::select(popDataFinalTest, -shares), n.trees=10)
+boostPred<- predict(boostFit, newdata= dplyr::select(popDataFinalTest, -shares), 
+                    n.trees=10)
 
 #RMSE value
 boostRMSE<- sqrt(mean(boostPred - popDataFinalTest$shares)^2 )
@@ -196,7 +287,7 @@ boostRMSE<- sqrt(mean(boostPred - popDataFinalTest$shares)^2 )
 ```{r}
 
 #table the RMSE from both of the model fits
-RMSE<- c(boost=boostRMSE, tree= treeRMSE)
+RMSE<- c(boost=boostRMSE, tree_based= treeRMSE)
 
 kable(as.data.frame( RMSE), caption = "RMSE table")
 ```
