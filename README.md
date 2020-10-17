@@ -19,7 +19,7 @@ The analysis is done for each of the week day.
 1. [Monday's Analysis](mondayAnalysis.md)
 2. [Tuesday's Analysis](tuesdayAnalysis.md)
 3. [Wednesday's Analysis](wednesdayAnalysis.md)
-4. [Thursday's Analysis](thursdaydayAnalysis.md)
+4. [Thursday's Analysis](thursdayAnalysis.md)
 5. [Friday's Analysis](fridaydayAnalysis.md)
 6. [Saturday's Analysis](saturdaydayAnalysis.md)
 7. [Sunday's Analysis](sundaydayAnalysis.md)
