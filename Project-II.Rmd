@@ -293,6 +293,14 @@ kable(as.data.frame( RMSE), caption = "RMSE table")
 
 From the above table the model having lowest value of RMSE is chosen to be appropriate to fit the data set.
 
+## Secondary Analysis
+```{lm}
 
+#Simple linear regression fit and predictions
+linearFit<-lm(shares~ ., data=popDataFinalTrain)
+linearPred<- predict(linearFit, newdata= dplyr::select(popDataFinalTest, -shares))
 
+#RMSE value
+linearRMSE<- sqrt(mean(linearPred - popDataFinalTest$shares)^2 )
+```
 

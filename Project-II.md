@@ -115,7 +115,7 @@ anyNA(popData)
 FALSE indicates there are no missing values. Next, to split the train
 and test set
 
-# For the weekday monday
+# For the weekday: monday
 
 ``` r
 #data table
@@ -164,7 +164,7 @@ popDayData
     ##  8       731             12              989           0.434             1.00
     ##  9       731             11               97           0.670             1.00
     ## 10       731             10              231           0.636             1.00
-    ## # ... with 6,651 more rows, and 54 more variables:
+    ## # … with 6,651 more rows, and 54 more variables:
     ## #   n_non_stop_unique_tokens <dbl>, num_hrefs <dbl>, num_self_hrefs <dbl>,
     ## #   num_imgs <dbl>, num_videos <dbl>, average_token_length <dbl>,
     ## #   num_keywords <fct>, data_channel_is_lifestyle <dbl>,
@@ -216,7 +216,8 @@ summary(sumryData$shares)
 
 ``` r
 #Number of key words
-kable(table(sumryData$num_keywords))
+
+  kable(table(sumryData$num_keywords))
 ```
 
 | Var1 | Freq |
@@ -358,3 +359,15 @@ RMSE table
 
 From the above table the model having lowest value of RMSE is chosen to
 be appropriate to fit the data set.
+
+## Secondary Analysis
+
+``` lm
+
+#Simple linear regression fit and predictions
+linearFit<-lm(shares~ ., data=popDataFinalTrain)
+linearPred<- predict(linearFit, newdata= dplyr::select(popDataFinalTest, -shares))
+
+#RMSE value
+linearRMSE<- sqrt(mean(linearPred - popDataFinalTest$shares)^2 )
+```
