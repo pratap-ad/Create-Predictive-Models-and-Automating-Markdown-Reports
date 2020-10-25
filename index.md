@@ -1,37 +1,37 @@
-## Welcome to GitHub Pages
+Project II -ST558
 
-You can use the [editor on GitHub](https://github.com/pratap-ad/Project-II-ST558/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+Brief about the repo
+This repo is built for the project II, ST558. This repo is built for direct connection with the R-studio, so that it would be readily available to the auther as well as to the users if any. And also to doucument the work securely for future reference. This repo contains the analysis about the online news popularity.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+The list of R-packages used are:
+tidyverse
+knitr
+caret
+gbm
+rattle
+rmarkdown
+ggplot2.
+The analysis is done for each of the week day.
 
-### Markdown
+Analysis for Monday is available here
+Analysis for Tuesday is available here
+Analysis for Wednesday is available here
+Analysis for Thursday is available here
+Analysis for Friday is available here
+Analysis for Saturday is available here
+Analysis for Sunday is available here
+Code used for Automation
+#select the weekdays from the data
+weekDays<- c("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/pratap-ad/Project-II-ST558/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+params= lapply(weekDays, FUN = function(x){list(weekday=x)})
+params
+output_file<- paste0(weekDays, "Analysis.md")
+output_file
+#put the filenames into the dataframe
+reports<- tibble(output_file, params)
+reports
+apply(reports, MARGIN = 1, 
+      FUN = function(x){
+        render(input="path\Project-II.Rmd", output_file = x[[1]], params =  x[[2]])
+      })
