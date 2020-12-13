@@ -17,12 +17,12 @@ available to the auther as well as to the users. This repo contains the analysis
 
 The analysis is done for each of the week day.
 1. [Monday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/mondayAnalysis.md) 
-2. [Tuesday's Analysis]
-3. [Wednesday's Analysis]
-4. [Thursday's Analysis]
-5. [Friday's Analysis]
-6. [Saturday's Analysis]
-7. [Sunday's Analysis]
+2. [Tuesday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/tuesdayAnalysis.md)
+3. [Wednesday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/wednesdayAnalysis.md)
+4. [Thursday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/thursdayAnalysis.md)
+5. [Friday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/fridayAnalysis.md)
+6. [Saturday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/saturdayAnalysis.md)
+7. [Sunday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/sundayAnalysis.md)
 
 
 ## Code used for Automation	
