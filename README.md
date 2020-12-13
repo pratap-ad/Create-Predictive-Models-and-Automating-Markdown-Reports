@@ -16,7 +16,7 @@ available to the auther as well as to the users. This repo contains the analysis
 
 
 The analysis is done for each of the week day.
-1. [Monday's Analysis]
+1. [Monday's Analysis](https://github.com/pratap-ad/Project-II-ST558/blob/main/mondayAnalysis.md) 
 2. [Tuesday's Analysis]
 3. [Wednesday's Analysis]
 4. [Thursday's Analysis]
