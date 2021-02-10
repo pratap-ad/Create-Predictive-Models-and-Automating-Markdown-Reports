@@ -2,7 +2,7 @@
 Project II -ST558
 
 This repo is built for the project II, ST558 with direct connection with the R-studio, so that it would be readily 
-available to the auther as well as to the users. This repo contains the analysis about the **online news popularity**. 
+available to the auther as well as to the users. This repo contains the analysis about the **online news popularity**. To view the analysis, please click on the respective day's analysis below.
 
 #The list of packages are: 
   + tidyverse 
